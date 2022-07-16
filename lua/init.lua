@@ -109,7 +109,6 @@ local function test()
     print("Test #" .. test_id .. ":")
 
     local input_file = assert(io.open(input_file_name, "w+"))
-    local output_file = assert(io.open(output_file_name, "w+"))
     local result_output_file = assert(io.open(result_output_file_name, "w+"))
 
     input_file:write(current_test["input"])
@@ -117,26 +116,31 @@ local function test()
 
     input_file:close()
     result_output_file:close()
-    output_file:close()
 
-    print(vim.api.nvim_call_function("system", {"time ./" ..
+    print(vim.api.nvim_call_function("system", {"timeout 2 ./" ..
     task_name ..
     " < " ..
     input_file_name ..
     " > " ..
     output_file_name}))
 
-    local diff_message = vim.api.nvim_call_function("system", {"diff -c "
-    .. output_file_name
-    .. " "
-    .. result_output_file_name})
+    local timeout_response_code = vim.api.nvim_call_function("eval", {"v:shell_error"})
 
-    local diff_response_code = vim.api.nvim_call_function("eval", {"v:shell_error"})
+    if timeout_response_code == 0 then
+      local diff_message = vim.api.nvim_call_function("system", {"diff "
+      .. output_file_name
+      .. " "
+      .. result_output_file_name})
 
-    if diff_response_code == 0 then
-      print("Passed !!!")
+      local diff_response_code = vim.api.nvim_call_function("eval", {"v:shell_error"})
+
+      if diff_response_code == 0 then
+        print("Passed !!!")
+      else
+        print(diff_message)
+      end
     else
-      print(diff_message)
+      print("TLE !!!")
     end
   end
 end

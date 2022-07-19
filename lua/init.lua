@@ -127,7 +127,7 @@ local function test()
     local timeout_response_code = vim.api.nvim_call_function("eval", {"v:shell_error"})
 
     if timeout_response_code == 0 then
-      local diff_message = vim.api.nvim_call_function("system", {"diff "
+      local diff_message = vim.api.nvim_call_function("system", {"diff -ytN --width=80 "
       .. output_file_name
       .. " "
       .. result_output_file_name})
